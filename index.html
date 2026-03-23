@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeNet Zenith Pro Max | Santanu Konwar</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Plus+Jakarta+Sans:wght@300;500;800&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg: #020205;
+            --accent: #00f2ff;
+            --secondary: #7000ff;
+            --news-red: #ff2d55;
+            --glass: rgba(255, 255, 255, 0.03);
+            --border: rgba(0, 242, 255, 0.15);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; outline: none; }
+        body { 
+            background: var(--bg); 
+            color: #fff; 
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        /* --- ANIMATED NEON BACKGROUND --- */
+        #bg-canvas {
+            position: fixed; top: 0; left: 0; z-index: -1;
+            background: radial-gradient(circle at 50% 50%, #0a0a1a 0%, #020205 100%);
+        }
+
+        /* --- NAVIGATION --- */
+        nav {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 25px 8%; background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(25px); position: sticky; top: 0; z-index: 1000;
+            border-bottom: 1px solid var(--border);
+        }
+        .logo { font-family: 'Syncopate'; font-size: 1.4rem; letter-spacing: 3px; color: var(--accent); }
+        .nav-links button {
+            background: none; border: none; color: #888; margin-left: 25px;
+            font-family: 'Syncopate'; font-size: 0.65rem; cursor: pointer; transition: 0.4s;
+        }
+        .nav-links button:hover, .nav-links button.active { color: var(--accent); text-shadow: 0 0 10px var(--accent); }
+
+        /* --- HERO --- */
+        .hero { height: 60vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+        .hero h1 { font-family: 'Syncopate'; font-size: 5rem; line-height: 1; margin-bottom: 20px; }
+        .gradient-text { background: linear-gradient(to bottom, #fff, var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+        /* --- CONTENT PAGES --- */
+        .page { display: none; padding: 40px 8% 100px; animation: pageIn 0.6s cubic-bezier(0.23, 1, 0.32, 1); }
+        .active-page { display: block; }
+        @keyframes pageIn { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- PRO CARDS --- */
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 25px; }
+        .card {
+            background: var(--glass); border: 1px solid var(--border); padding: 35px;
+            border-radius: 24px; position: relative; transition: 0.5s; cursor: pointer;
+            overflow: hidden; backdrop-filter: blur(10px);
+        }
+        .card:hover { border-color: var(--accent); transform: translateY(-10px) scale(1.02); box-shadow: 0 20px 40px rgba(0, 242, 255, 0.1); }
+        .card-tag { font-family: 'JetBrains Mono'; color: var(--accent); font-size: 0.7rem; letter-spacing: 2px; margin-bottom: 15px; display: block; }
+        .news-card { border-left: 4px solid var(--news-red); }
+
+        /* --- ADMIN COMMAND CENTER --- */
+        .admin-box {
+            max-width: 600px; margin: 0 auto; background: #0a0a0f; padding: 50px;
+            border: 1px solid var(--accent); border-radius: 30px; box-shadow: 0 0 50px rgba(0, 242, 255, 0.1);
+        }
+        input, textarea, select {
+            width: 100%; padding: 15px; margin-bottom: 15px; background: #000;
+            border: 1px solid #222; color: #fff; border-radius: 12px; font-family: 'Plus Jakarta Sans';
+        }
+        .btn-pub {
+            width: 100%; padding: 18px; background: var(--accent); color: #000;
+            font-weight: 800; border: none; border-radius: 12px; cursor: pointer; transition: 0.3s;
+        }
+        .btn-pub:hover { box-shadow: 0 0 25px var(--accent); transform: scale(1.02); }
+
+        /* --- LOCK OVERLAY --- */
+        .overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.95);
+            z-index: 2000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(15px);
+        }
+
+        /* --- MODAL --- */
+        #modal {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.98); z-index: 3000;
+            display: none; align-items: center; justify-content: center;
+        }
+        .modal-box { width: 90%; max-width: 800px; background: #050508; padding: 60px; border-radius: 30px; border: 1px solid var(--accent); }
+        pre { background: #000; padding: 25px; border-radius: 15px; color: var(--accent); font-family: 'JetBrains Mono'; overflow-x: auto; margin-top: 20px; border: 1px solid #111; }
+    </style>
+</head>
+<body>
+
+    <canvas id="bg-canvas"></canvas>
+
+    <nav>
+        <div class="logo">CODENET_V3</div>
+        <div class="nav-links">
+            <button id="nav-home" class="active" onclick="switchPage('home')">REPOSITORY</button>
+            <button id="nav-news" onclick="switchPage('news')">GLOBAL NEWS</button>
+            <button id="nav-dev" onclick="switchPage('dev')">FOUNDER</button>
+            <button style="color: var(--accent); border: 1px solid var(--accent); padding: 8px 15px; border-radius: 50px;" onclick="openGate()">PUBLISH</button>
+        </div>
+    </nav>
+
+    <section id="home" class="page active-page">
+        <div class="hero">
+            <h1 class="gradient-text">code<br>net</h1>
+            <p style="color: #666; font-size: 1.2rem;">Professional definitions and thousands of code modules.</p>
+        </div>
+        <div class="grid" id="codeGrid"></div>
+    </section>
+
+    <section id="news" class="page">
+        <h1 style="font-family: 'Syncopate'; margin-bottom: 50px;">LATEST<br><span style="color: var(--news-red)">BROADCASTS</span></h1>
+        <div class="grid" id="newsGrid"></div>
+    </section>
+
+    <section id="dev" class="page">
+        <div style="text-align: center; max-width: 800px; margin: 0 auto; background: var(--glass); padding: 80px; border-radius: 40px; border: 1px solid var(--border);">
+            <h1 style="font-family: 'Syncopate'; color: var(--accent);">SANTANU KONWAR</h1>
+            <p style="font-size: 1.2rem; line-height: 1.8; margin: 30px 0; color: #ccc;">
+                Founder of HamaraMarket, FireProduct, and HyperCreators. Architect of high-performance animated web ecosystems.
+            </p>
+        </div>
+    </section>
+
+    <section id="admin" class="page">
+        <div class="admin-box">
+            <h2 style="font-family: 'Syncopate'; margin-bottom: 30px; font-size: 1rem;">PUBLISH CENTER</h2>
+            <select id="pType">
+                <option value="code">Repository Doc</option>
+                <option value="news">Global News</option>
+            </select>
+            <input type="text" id="pTitle" placeholder="Headline">
+            <textarea id="pBody" rows="8" placeholder="Enter Full Definition and Code here..."></textarea>
+            <button class="btn-pub" onclick="pushBroadcast()">INITIALIZE RELEASE</button>
+        </div>
+    </section>
+
+    <div id="gate" class="overlay">
+        <div class="admin-box" style="width: 400px; text-align: center;">
+            <h3 style="font-family: 'Syncopate'; color: var(--accent); margin-bottom: 20px;">SECURITY</h3>
+            <input type="password" id="pass" placeholder="PASSCODE">
+            <button class="btn-pub" onclick="verify()">AUTH_LOGIN</button>
+            <p onclick="closeGate()" style="margin-top:20px; color: #444; cursor:pointer;">Cancel</p>
+        </div>
+    </div>
+
+    <div id="modal" onclick="this.style.display='none'">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <span id="mTag" class="card-tag"></span>
+            <h2 id="mTitle" style="font-family: 'Syncopate'; margin: 15px 0;"></h2>
+            <p id="mDesc" style="color: #888; line-height: 1.6;"></p>
+            <pre id="mCode"></pre>
+        </div>
+    </div>
+
+    <script>
+        // 1. DYNAMIC BACKGROUND
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        function animateBg() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.strokeStyle = 'rgba(0, 242, 255, 0.05)';
+            ctx.lineWidth = 1;
+            for(let i=0; i<canvas.width; i+=50) {
+                ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height); ctx.stroke();
+            }
+            for(let j=0; j<canvas.height; j+=50) {
+                ctx.beginPath(); ctx.moveTo(0, j); ctx.lineTo(canvas.width, j); ctx.stroke();
+            }
+            requestAnimationFrame(animateBg);
+        }
+        animateBg();
+
+        // 2. DATA
+        const library = [
+            { tag: "HTML5", title: "Document Skeleton", desc: "The essential tags for building any modern webpage.", code: "<!DOCTYPE html>\n<html>\n<head>\n  <title>Pro Website</title>\n</head>\n<body>\n  <h1>Welcome</h1>\n</body>\n</html>" },
+            { tag: "REACT.JS", title: "Functional Components", desc: "How to build UI blocks using React Hooks.", code: "const Header = () => {\n  return <nav>Navigation</nav>;\n};" },
+            { tag: "NEXT.JS", title: "Client Routing", desc: "Using the Link component for instant page loads.", code: "import Link from 'next/link';\n<Link href='/about'>About Page</Link>" },
+            { tag: "CSS3", title: "Glassmorphism Effect", desc: "The ultra-modern blur and border effect.", code: ".glass {\n  backdrop-filter: blur(10px);\n  background: rgba(255, 255, 255, 0.05);\n  border: 1px solid rgba(255, 255, 255, 0.1);\n}" }
+        ];
+        let newsItems = [];
+
+        // 3. UI LOGIC
+        function switchPage(id) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
+            document.querySelectorAll('.nav-links button').forEach(b => b.classList.remove('active'));
+            document.getElementById(id).classList.add('active-page');
+            const navBtn = document.getElementById('nav-'+id);
+            if(navBtn) navBtn.classList.add('active');
+            window.scrollTo(0,0);
+        }
+
+        function openGate() { document.getElementById('gate').style.display = 'flex'; }
+        function closeGate() { document.getElementById('gate').style.display = 'none'; }
+
+        function verify() {
+            if(document.getElementById('pass').value === "1234") {
+                closeGate(); switchPage('admin');
+                document.getElementById('pass').value = '';
+            } else { alert("ACCESS DENIED"); }
+        }
+
+        function pushBroadcast() {
+            const type = document.getElementById('pType').value;
+            const title = document.getElementById('pTitle').value;
+            const body = document.getElementById('pBody').value;
+
+            if(title && body) {
+                if(type === 'code') {
+                    library.unshift({tag: "LATEST DOC", title, desc: body.substring(0, 80), code: body});
+                    renderFeeds(); switchPage('home');
+                } else {
+                    newsItems.unshift({title, body});
+                    renderFeeds(); switchPage('news');
+                }
+            }
+        }
+
+        function renderFeeds() {
+            const codeG = document.getElementById('codeGrid');
+            codeG.innerHTML = '';
+            library.forEach(item => {
+                codeG.innerHTML += `
+                    <div class="card" onclick="openModal('${item.tag}', '${item.title}', '${item.desc}', \`${item.code}\`)">
+                        <span class="card-tag">${item.tag}</span>
+                        <h3 style="font-size: 1.4rem;">${item.title}</h3>
+                        <p style="margin-top: 10px; opacity: 0.5;">${item.desc}</p>
+                    </div>
+                `;
+            });
+
+            const newsG = document.getElementById('newsGrid');
+            newsG.innerHTML = '';
+            newsItems.forEach(n => {
+                newsG.innerHTML += `
+                    <div class="card news-card">
+                        <span class="card-tag" style="color:var(--news-red)">SYSTEM ALERT</span>
+                        <h3>${n.title}</h3>
+                        <p style="margin-top: 10px; opacity: 0.6;">${n.body}</p>
+                    </div>
+                `;
+            });
+        }
+
+        function openModal(tag, title, desc, code) {
+            document.getElementById('mTag').innerText = tag;
+            document.getElementById('mTitle').innerText = title;
+            document.getElementById('mDesc').innerText = desc;
+            document.getElementById('mCode').innerText = code;
+            document.getElementById('modal').style.display = 'flex';
+        }
+
+        // Init
+        renderFeeds();
+    </script>
+</body>
+</html>
